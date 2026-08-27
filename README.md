@@ -1,5 +1,9 @@
 # Checkpost — the merchant-side gateway for AI buyers
 
+[![CI](https://github.com/Avan1sh/checkpost/actions/workflows/ci.yml/badge.svg)](https://github.com/Avan1sh/checkpost/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%2B-blue.svg)](https://www.python.org/downloads/)
+
 **Razorpay AI Buildathon · Track 1 (AI Growth & Agentic Commerce)**
 
 Agentic commerce has produced a thousand buyers and no bouncer. Buyer-side agents get
