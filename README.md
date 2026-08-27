@@ -42,6 +42,34 @@ test APIs (same interface, same code paths).
 API docs at `http://localhost:8000/docs`. Agent endpoints authenticate with the
 `X-Agent-Key` passports printed by the seed script.
 
+**Merchant dashboard** (traffic, decision timelines, approval queue, policy, audit log):
+
+```bash
+npm --prefix dashboard install && npm --prefix dashboard run dev   # http://localhost:5173
+```
+
+**Demo buyer agent** — seven scripted scenarios (happy path, policy block with
+alternative, Rx approval, controlled substance, catalog injection, ambiguous timeout,
+duplicate webhook), or a real Claude agent that shops with tools:
+
+```bash
+python -m buyer_agent.pillpal all
+python -m buyer_agent.pillpal agent "refill my mother's diabetes supplies under 2000 rupees"
+```
+
+
+## Live modes
+
+- **LLM advisory checks** (intent–cart matching, injection screening, policy compiler):
+  set `CHECKPOST_LLM_ENABLED=true` and `CHECKPOST_ANTHROPIC_API_KEY` (or
+  `ANTHROPIC_API_KEY`) in `.env`. Without a key the gateway **fails closed** — advisory
+  checks abstain and proposals escalate to human review (`CHECKPOST_LLM_FAILURE_POLICY`
+  controls this posture).
+- **Real Razorpay test mode:** `CHECKPOST_RAZORPAY_MODE=test` plus
+  `CHECKPOST_RAZORPAY_KEY_ID` / `CHECKPOST_RAZORPAY_KEY_SECRET`. Same interface, same
+  code paths as the simulator; point a test-mode webhook at `/webhooks/razorpay` with
+  your `CHECKPOST_RAZORPAY_WEBHOOK_SECRET`.
+
 ## Tests
 
 ```bash
@@ -55,8 +83,33 @@ API docs at `http://localhost:8000/docs`. Agent endpoints authenticate with the
   orders, bounded retry exhaustion, catalog injection quarantine, and the invariant test
   that an LLM verdict cannot override a deterministic block.
 
+## Evaluation
+
+```bash
+python -m scripts.run_evals
+```
+
+Runs 12 deterministic scenarios (15 with a live LLM key) against a fresh gateway and
+writes measured results to [docs/evaluation-results.md](docs/evaluation-results.md).
+Every number comes from an executed scenario in that run — nothing is hardcoded.
+Current run: **12/12** — zero unauthorized money actions, zero duplicate orders under
+ambiguous timeouts, 100% duplicate-webhook suppression, fail-closed under LLM outage.
+
 ## Docs
 
 - [docs/architecture.md](docs/architecture.md) — the pipeline, components, Razorpay integration map
+- [docs/safety.md](docs/safety.md) — boundary table, injection posture, deliberate non-choices
 - [docs/failure-modes.md](docs/failure-modes.md) — the five failure classes and how each is handled
 - [docs/decisions.md](docs/decisions.md) — decision log with rejected alternatives
+- [docs/evaluation-results.md](docs/evaluation-results.md) — measured eval output
+
+## Repo map
+
+```text
+gateway/          the product: api/ core/ domain/ trust/ policy/ llm/ payments/ audit/
+buyer_agent/      PillPal — scripted demo scenarios + real Claude tool-runner agent
+dashboard/        React merchant console (Vite, no UI framework)
+scripts/          seed.py (demo world) · run_evals.py (measured evaluation)
+tests/            unit/ integration/ safety/
+docs/             architecture · safety · failure-modes · decisions · eval results
+```

@@ -1,6 +1,6 @@
 # Checkpost — Measured Evaluation Results
 
-Produced by `python -m scripts.run_evals` (mock Razorpay, LLM advisory checks disabled — deterministic paths under test; the fail-closed scenario measures the gateway's posture when advisory checks are unavailable).
+Produced by `python -m scripts.run_evals` (mock Razorpay). Scenarios S1–S12 exercise the deterministic paths; S13–S15 exercise the live LLM advisory checks and appear only when run with `CHECKPOST_LLM_ENABLED=true` and an API key.
 
 **Scenarios passed: 12/12**
 
