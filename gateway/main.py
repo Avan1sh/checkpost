@@ -48,6 +48,10 @@ app.include_router(agent_router)
 app.include_router(merchant_router)
 app.include_router(webhook_router)
 
+if get_settings().razorpay_mode == "mock":
+    from gateway.api.routes_debug import router as debug_router
+    app.include_router(debug_router)
+
 
 @app.get("/health")
 def health():

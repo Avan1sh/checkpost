@@ -49,7 +49,7 @@ def seed() -> dict:
 
         mandate(pillpal, "Asha Verma",
                 "Monthly diabetes care refill for my mother — strips, metformin, and basic wellness items.",
-                250_000, ["diabetes-care", "otc", "wellness", "prescription"])
+                2_000_000, ["diabetes-care", "otc", "wellness", "prescription"])
         mandate(pillpal, "Asha Verma", "One-off cold and fever purchase.", 50_000, ["otc"], days=-1)  # expired
         mandate(bulkbot, "Procurement Desk",
                 "Stock the office first-aid room.", 5_000_000, [])
