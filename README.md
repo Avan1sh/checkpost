@@ -61,7 +61,6 @@ python -m buyer_agent.pillpal all
 python -m buyer_agent.pillpal agent "refill my mother's diabetes supplies under 2000 rupees"
 ```
 
-
 ## Live modes
 
 - **LLM advisory checks** (intent–cart matching, injection screening, policy compiler):
