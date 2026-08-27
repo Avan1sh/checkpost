@@ -63,8 +63,11 @@ python -m buyer_agent.pillpal agent "refill my mother's diabetes supplies under 
 - **LLM advisory checks** (intent–cart matching, injection screening, policy compiler):
   set `CHECKPOST_LLM_ENABLED=true` and `CHECKPOST_GEMINI_API_KEY` in `.env`. Get a free
   key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — the default
-  model (`gemini-2.5-flash`) runs on Google AI Studio's free tier, so the whole project
-  is reproducible without paid credentials. Without a key the gateway **fails closed** —
+  model (`gemini-3.5-flash-lite`) runs on Google AI Studio's free tier, so the whole project
+  is reproducible without paid credentials. (Flash-Lite is the default deliberately: the
+  free tier caps full Flash models at ~20 requests/day, which the eval suite alone would
+  exhaust; Lite's daily quota is far larger and the advisory verdicts don't need more
+  model.) Without a key the gateway **fails closed** —
   advisory checks abstain and proposals escalate to human review
   (`CHECKPOST_LLM_FAILURE_POLICY` controls this posture).
 - **Real Razorpay test mode:** `CHECKPOST_RAZORPAY_MODE=test` plus

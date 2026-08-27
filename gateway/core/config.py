@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # Advisory LLM provider: Google AI Studio (Gemini). The advisory layer is
     # provider-swappable by design — see docs/decisions.md D9.
     gemini_api_key: str = ""
-    llm_model: str = "gemini-2.5-flash"
+    llm_model: str = "gemini-3.5-flash-lite"
     llm_max_retries: int = 3  # free-tier rate limits (429) are retried with backoff
     # When false (default for tests/evals without a key), LLM checks abstain.
     llm_enabled: bool = False

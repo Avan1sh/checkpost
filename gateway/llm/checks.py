@@ -129,7 +129,8 @@ def _run(session: Optional[Session], *, role: str, proposal_id: str, system: str
                 last_error = exc
                 if not _is_rate_limited(exc) or attempt == settings.llm_max_retries - 1:
                     raise
-                time.sleep(2 ** attempt)  # 1s, 2s, 4s — free tier is ~10-15 RPM
+                # Free-tier quotas are per-minute; short backoffs just burn attempts.
+                time.sleep(10 * (attempt + 1))  # 10s, 20s
         else:  # pragma: no cover - loop always breaks or raises
             raise last_error or RuntimeError("llm call failed")
 

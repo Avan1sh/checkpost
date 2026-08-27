@@ -173,18 +173,30 @@ def run_llm_agent(goal: str) -> None:
 
     def pay_proposal(proposal_id: str) -> str:
         """Pay an authorized proposal (state awaiting_payment) and deliver the payment
-        confirmation webhook. Returns the resulting state.
+        confirmation webhook. Only works when the gateway runs its payment simulator;
+        against real Razorpay test mode it returns an explanation instead.
 
         Args:
             proposal_id: The proposal to pay.
         """
-        pay(proposal_id)
+        response = http.post("/debug/simulate-payment", json={"proposal_id": proposal_id})
+        if response.status_code != 200:
+            return json.dumps({
+                "paid": False,
+                "explanation": "Payment simulation unavailable (gateway is on real "
+                               "Razorpay test mode). The order exists and awaits payment "
+                               "via Razorpay checkout. Report the state as awaiting_payment "
+                               "— do NOT claim the payment completed.",
+                "gateway_state": http.get(f"/agent/proposals/{proposal_id}").json(),
+            })
+        hook = response.json()
+        http.post(hook["deliver_to"], content=hook["body"], headers=hook["headers"])
         return json.dumps(http.get(f"/agent/proposals/{proposal_id}").json())
 
     client = genai.Client(api_key=os.environ.get("CHECKPOST_GEMINI_API_KEY")
                           or os.environ.get("GEMINI_API_KEY"))
     response = client.models.generate_content(
-        model=os.environ.get("PILLPAL_MODEL", "gemini-2.5-flash"),
+        model=os.environ.get("PILLPAL_MODEL", "gemini-3.5-flash-lite"),
         contents=goal,
         config=types.GenerateContentConfig(
             system_instruction=AGENT_SYSTEM,
