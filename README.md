@@ -101,8 +101,13 @@ python -m scripts.run_evals
 Runs 12 deterministic scenarios (15 with a live LLM key) against a fresh gateway and
 writes measured results to [docs/evaluation-results.md](docs/evaluation-results.md).
 Every number comes from an executed scenario in that run — nothing is hardcoded.
-Current run: **12/12** — zero unauthorized money actions, zero duplicate orders under
-ambiguous timeouts, 100% duplicate-webhook suppression, fail-closed under LLM outage.
+Latest run: **15/15** with a live Gemini key — the 12 deterministic scenarios plus live
+injection quarantine, off-purpose-cart escalation, and policy compilation from prose.
+Without a key the same command runs **12/12** and skips the three LLM scenarios, which is
+exactly what CI verifies on every push.
+
+Headline results: zero unauthorized money actions, zero duplicate orders under ambiguous
+timeouts, 100% duplicate-webhook suppression, and fail-closed behaviour under LLM outage.
 
 ## Docs
 
