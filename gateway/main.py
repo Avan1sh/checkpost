@@ -35,8 +35,11 @@ app = FastAPI(
     description="Merchant-side trust, policy and payment gateway for AI buyers.",
     lifespan=lifespan,
 )
+# The merchant dashboard is a local dev server whose port varies (Vite picks the next
+# free one), so allow any loopback origin rather than pinning a single port.
 app.add_middleware(
-    CORSMiddleware, allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    CORSMiddleware,
+    allow_origin_regex=r"http://(localhost|127\.0\.0\.1|\[::1\]):\d+",
     allow_methods=["*"], allow_headers=["*"],
 )
 
