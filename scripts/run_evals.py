@@ -226,8 +226,8 @@ def run() -> Suite:
 
     # ---- LLM-graded scenarios: run only with a live key + CHECKPOST_LLM_ENABLED=true.
     settings = get_settings()
-    llm_live = settings.llm_enabled and (settings.anthropic_api_key
-                                         or os.environ.get("ANTHROPIC_API_KEY"))
+    llm_live = settings.llm_enabled and (settings.gemini_api_key
+                                         or os.environ.get("GEMINI_API_KEY"))
     if llm_live:
         # S13 injected catalog content -> flagged, quarantined, escalated
         fresh_world()
@@ -266,8 +266,8 @@ def run() -> Suite:
                          f"{rules.get('max_order_paise')}/{rules.get('approval_over_paise')}"
                          f"/{rules.get('blocked_categories')}", ok)
     else:
-        print("[skip] live LLM scenarios (S13–S15): set CHECKPOST_LLM_ENABLED=true and "
-              "provide an API key to run them")
+        print("[skip] live LLM scenarios (S13-S15): set CHECKPOST_LLM_ENABLED=true and "
+              "CHECKPOST_GEMINI_API_KEY to run them")
 
     return suite
 

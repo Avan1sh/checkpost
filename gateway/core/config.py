@@ -18,8 +18,11 @@ class Settings(BaseSettings):
     # Secret used to sign/verify agent mandates (demo-grade HMAC trust layer, see docs/decisions.md D5).
     mandate_signing_secret: str = "mandate_demo_secret"
 
-    anthropic_api_key: str = ""
-    llm_model: str = "claude-sonnet-5"
+    # Advisory LLM provider: Google AI Studio (Gemini). The advisory layer is
+    # provider-swappable by design — see docs/decisions.md D9.
+    gemini_api_key: str = ""
+    llm_model: str = "gemini-2.5-flash"
+    llm_max_retries: int = 3  # free-tier rate limits (429) are retried with backoff
     # When false (default for tests/evals without a key), LLM checks abstain.
     llm_enabled: bool = False
     # What an abstaining/failed advisory check does: "escalate" (fail-closed, default —

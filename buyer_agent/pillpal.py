@@ -6,7 +6,7 @@ Two ways to drive it:
       python -m buyer_agent.pillpal happy | greedy | rx | controlled | injection \
                                     | timeout | double-webhook | all
 
-  Real agent mode (needs ANTHROPIC_API_KEY) — Claude shops with tools:
+  Real agent mode (needs CHECKPOST_GEMINI_API_KEY) — an LLM shops with tools:
       python -m buyer_agent.pillpal agent "refill my mother's diabetes supplies under 2000 rupees"
 
 PillPal is intentionally an ordinary buyer agent: it sees only the agent-facing API
@@ -145,24 +145,19 @@ stop and report that. Report the final state and order/payment details clearly."
 
 
 def run_llm_agent(goal: str) -> None:
-    import anthropic
-    from anthropic import beta_tool
+    from google import genai
+    from google.genai import types
 
-    client = anthropic.Anthropic()
-
-    @beta_tool
     def browse_catalog() -> str:
         """List the pharmacy's products available to agents (sku, name, category,
         price in paise, whether pharmacist approval is required, max qty per order)."""
         return json.dumps(http.get("/agent/catalog").json())
 
-    @beta_tool
     def list_mandates() -> str:
         """List this agent's mandates: id, principal, purpose, spend cap and remaining
         authority in paise, allowed categories, expiry, status."""
         return json.dumps(http.get("/agent/mandates").json())
 
-    @beta_tool
     def submit_proposal(mandate_id: str, intent_text: str, cart_json: str) -> str:
         """Submit a purchase proposal to the gateway.
 
@@ -176,24 +171,36 @@ def run_llm_agent(goal: str) -> None:
             "cart": json.loads(cart_json)})
         return json.dumps(response.json())
 
-    @beta_tool
     def pay_proposal(proposal_id: str) -> str:
         """Pay an authorized proposal (state awaiting_payment) and deliver the payment
-        confirmation webhook. Returns the resulting state."""
+        confirmation webhook. Returns the resulting state.
+
+        Args:
+            proposal_id: The proposal to pay.
+        """
         pay(proposal_id)
         return json.dumps(http.get(f"/agent/proposals/{proposal_id}").json())
 
-    runner = client.beta.messages.tool_runner(
-        model=os.environ.get("PILLPAL_MODEL", "claude-opus-5"),
-        max_tokens=16000,
-        system=AGENT_SYSTEM,
-        tools=[browse_catalog, list_mandates, submit_proposal, pay_proposal],
-        messages=[{"role": "user", "content": goal}],
+    client = genai.Client(api_key=os.environ.get("CHECKPOST_GEMINI_API_KEY")
+                          or os.environ.get("GEMINI_API_KEY"))
+    response = client.models.generate_content(
+        model=os.environ.get("PILLPAL_MODEL", "gemini-2.5-flash"),
+        contents=goal,
+        config=types.GenerateContentConfig(
+            system_instruction=AGENT_SYSTEM,
+            tools=[browse_catalog, list_mandates, submit_proposal, pay_proposal],
+            automatic_function_calling=types.AutomaticFunctionCallingConfig(
+                maximum_remote_calls=12),
+        ),
     )
-    for message in runner:
-        for block in message.content:
-            if block.type == "text" and block.text.strip():
-                print(block.text)
+
+    for entry in response.automatic_function_calling_history or []:
+        for part in getattr(entry, "parts", None) or []:
+            call = getattr(part, "function_call", None)
+            if call is not None:
+                say(f"[tool] {call.name}({dict(call.args or {})})")
+    print()
+    print(response.text or "(no final message — check the tool calls above)")
 
 
 def main() -> None:

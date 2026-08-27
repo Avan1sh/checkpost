@@ -48,7 +48,27 @@ as a safety mechanism — prompts are not boundaries.
 ## D8 — Cart is re-priced from the catalog; agent-supplied prices are never trusted
 Closes the stale-price / fabricated-price class of attacks with one rule.
 
-## D9 — Anthropic Claude for the three LLM roles
-Razorpay's own agentic stack (Agent Studio, MCP integrations) is built on Claude, strict
-tool-schema outputs fit the advisory-verdict design, and one provider keeps the eval
-cost/latency story simple.
+## D9 — Gemini (Google AI Studio) for the three advisory roles
+The advisory layer needs structured JSON verdicts and nothing else — no long context, no
+tool use, no reasoning traces. Gemini Flash does that well, and its free tier makes the
+project reproducible by anyone cloning the repo, including judges, without a paid key.
+
+The swap itself is the point worth noting: moving the whole system from Claude to Gemini
+touched one function (`_run()` in `gateway/llm/checks.py`) plus config. That is a direct
+consequence of the architecture — a component that cannot move money, cannot approve
+anything, and only ever returns a schema-validated verdict is inherently swappable. The
+deterministic core, the state machine, and every safety property were untouched, and the
+test suite passed before and after unchanged.
+
+Two adjustments came with the move:
+- The policy compiler now emits into `CompiledRulesDraft` rather than `PolicyRuleSet`
+  directly, folding key/value caps into the engine's dicts via `to_ruleset()`. This keeps
+  the deterministic engine's schema from being shaped by what an LLM can emit, and keeps
+  the model's output schema to arrays and scalars, which every provider supports.
+  (Google's SDK does transform Python dicts into schemas with `additional_properties`, so
+  this is a portability and coupling choice, not a Gemini limitation.)
+- Free-tier rate limits (~10-15 requests/minute) are retried with backoff inside `_run()`;
+  every other failure abstains immediately, since a slow escalation is worse than a fast one.
+
+Rejected: OpenAI (no free tier for a student), local models (adds ops burden and a weaker
+structured-output story for no architectural gain).

@@ -69,7 +69,7 @@ gateway/
 │               path is AP2 verifiable credentials / NPCI UAP once live)
 ├── policy/     compiled policy schema (Pydantic) + deterministic evaluation engine —
 │               pure functions, exhaustively unit-tested
-├── llm/        Claude client + the three advisory roles: policy compiler, intent matcher,
+├── llm/        Gemini client + the three advisory roles: policy compiler, intent matcher,
 │               injection screen; strict JSON outputs; advisory-only by construction
 ├── payments/   RazorpayClient interface with two implementations: real (test-mode HTTP)
 │               and mock (fault-injecting simulator); idempotency store; reconciler loop

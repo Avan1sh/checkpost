@@ -24,7 +24,7 @@ Produced by `python -m scripts.run_evals` (mock Razorpay). Scenarios S1–S12 ex
 - **Unauthorized money actions:** 0 — no scenario produced a Razorpay order without passing the deterministic policy engine.
 - **Duplicate order rate under ambiguous timeout:** 0 (order adopted, not recreated)
 - **Duplicate webhook suppression:** 100%
-- **Median proposal-pipeline latency (deterministic path, local):** 31 ms
+- **Median proposal-pipeline latency (deterministic path, local):** 30 ms
 
 ## What is NOT measured here
 
